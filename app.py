@@ -1,7 +1,10 @@
 from flask import Flask, jsonify
 import os
 from dotenv import load_dotenv
+
+
 from routes.auth import auth_bp
+from routes.customers import customers_bp
 
 from services.auth_decorators import (
     login_required,
@@ -19,8 +22,11 @@ def create_app():
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
+
     # Register authentication APIs
     app.register_blueprint(auth_bp)
+    app.register_blueprint(customers_bp)
+
 
     # Home route
     @app.route("/")
@@ -34,7 +40,8 @@ def create_app():
             "status": "success",
             "message": "Application is running"
         })
-
+    
+    # login routing 
     @app.route("/api/test/login")
     @login_required
     def test_login_access():
@@ -43,7 +50,7 @@ def create_app():
             "message": "Login access granted"
         })
 
-
+    #admin routing
     @app.route("/api/test/admin")
     @admin_required
     def test_admin_access():
@@ -52,7 +59,7 @@ def create_app():
             "message": "Admin access granted"
         })
 
-
+    #sales routing
     @app.route("/api/test/sales")
     @sales_required
     def test_sales_access():
