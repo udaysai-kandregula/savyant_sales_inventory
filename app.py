@@ -1,11 +1,13 @@
 from flask import Flask, jsonify
-
+import os
+from dotenv import load_dotenv
 
 def create_app():
     app = Flask(__name__)
 
     # Basic application configuration
-    app.config["SECRET_KEY"] = "development-secret"
+    load_dotenv()
+    app.confing["SECRET_"]  = os.getenv("SECRET_KEY")
 
     # Home route
     @app.route("/")
