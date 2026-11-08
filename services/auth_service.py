@@ -53,3 +53,31 @@ def register_user(name, email, password, role="sales"):
 
     finally:
         connection.close()
+
+
+
+def authenticate_user(email, password):
+    """Find a user and verify their password."""
+
+    connection = get_db_connection()
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT id, name, email, password_hash, role
+                FROM users
+                WHERE email = %s
+                """,
+                (email.strip().lower(),)
+            )
+
+            user = cursor.fetchone()
+
+        if user and verify_password(password, user["password_hash"]):
+            return user
+
+        return None
+
+    finally:
+        connection.close()

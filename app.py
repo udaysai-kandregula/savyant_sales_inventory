@@ -1,13 +1,20 @@
 from flask import Flask, jsonify
 import os
 from dotenv import load_dotenv
+from routes.auth import auth_bp
+
+
 
 def create_app():
     app = Flask(__name__)
 
-    # Basic application configuration
-    load_dotenv()
-    app.confing["SECRET_"]  = os.getenv("SECRET_KEY")
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+
+    app.config["SESSION_COOKIE_HTTPONLY"] = True
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+
+    # Register authentication APIs
+    app.register_blueprint(auth_bp)
 
     # Home route
     @app.route("/")
