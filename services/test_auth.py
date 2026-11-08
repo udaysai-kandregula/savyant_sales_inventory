@@ -1,5 +1,5 @@
 from services.auth_service import hash_password, verify_password
-password = "Test@12345"
+password = "Test@0000"
 
 hashed_password = hash_password(password)
 
