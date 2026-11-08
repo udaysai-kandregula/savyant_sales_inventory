@@ -3,6 +3,12 @@ import os
 from dotenv import load_dotenv
 from routes.auth import auth_bp
 
+from services.auth_decorators import (
+    login_required,
+    admin_required,
+    sales_required
+)
+
 
 
 def create_app():
@@ -27,6 +33,32 @@ def create_app():
         return jsonify({
             "status": "success",
             "message": "Application is running"
+        })
+
+    @app.route("/api/test/login")
+    @login_required
+    def test_login_access():
+        return jsonify({
+            "success": True,
+            "message": "Login access granted"
+        })
+
+
+    @app.route("/api/test/admin")
+    @admin_required
+    def test_admin_access():
+        return jsonify({
+            "success": True,
+            "message": "Admin access granted"
+        })
+
+
+    @app.route("/api/test/sales")
+    @sales_required
+    def test_sales_access():
+        return jsonify({
+            "success": True,
+            "message": "Sales access granted"
         })
 
     return app
