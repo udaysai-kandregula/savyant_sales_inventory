@@ -1,0 +1,4 @@
+product_code,name,category,price,stock_quantity
+CSV101,Wireless Headphones,Accessories,3500.00,10
+CSV102,Web Camera,Accessories,invalid_price,5
+CSV103,USB Cable,Accessories,250.00,-2

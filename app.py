@@ -13,7 +13,10 @@ from services.auth_decorators import (
 )
 
 from routes.products import products_bp
-
+from routes.orders import orders_bp
+from routes.stock_movements import stock_movements_bp
+from routes.reports import reports_bp
+from routes.product_import import product_import_bp
 
 
 def create_app():
@@ -29,6 +32,10 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(customers_bp)
     app.register_blueprint(products_bp)
+    app.register_blueprint(orders_bp)
+    app.register_blueprint(stock_movements_bp)
+    app.register_blueprint(reports_bp)
+    app.register_blueprint(product_import_bp)
 
 
     # Home route

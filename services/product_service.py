@@ -1,6 +1,6 @@
 
 from database.db import get_db_connection
-# from database.db import get_db_connection
+
 
 
 def create_product(
@@ -216,3 +216,118 @@ def set_product_status(product_id, status):
 
     finally:
         connection.close()
+
+
+def adjust_stock(product_id, adjustment_type, quantity, reason, created_by):
+    """Increase or decrease product stock and record the movement."""
+
+    # Validate product ID
+    if isinstance(product_id, bool) or not isinstance(product_id, int) or product_id <= 0:
+        raise ValueError("Invalid product ID")
+
+    # Validate user ID
+    if isinstance(created_by, bool) or not isinstance(created_by, int) or created_by <= 0:
+        raise ValueError("Invalid user ID")
+
+    # Validate adjustment type
+    if adjustment_type not in ("increase", "decrease"):
+        raise ValueError("Adjustment type must be increase or decrease")
+
+    # Validate quantity
+    if isinstance(quantity, bool) or not isinstance(quantity, int) or quantity <= 0:
+        raise ValueError("Quantity must be a positive whole number")
+
+    # Validate reason
+    if not isinstance(reason, str) or not reason.strip():
+        raise ValueError("Adjustment reason is required")
+
+    connection = get_db_connection()
+
+    try:
+        with connection.cursor() as cursor:
+
+            # 1. Lock the product row
+            cursor.execute(
+                """
+                SELECT id, stock_quantity
+                FROM products
+                WHERE id = %s
+                FOR UPDATE
+                """,
+                (product_id,)
+            )
+
+            product = cursor.fetchone()
+
+            if not product:
+                raise ValueError("Product not found")
+
+            current_stock = product["stock_quantity"]
+
+            # 2. Calculate new stock
+            if adjustment_type == "increase":
+                new_stock = current_stock + quantity
+                movement_type = "adjustment_in"
+                quantity_change = quantity
+
+            else:
+                if quantity > current_stock:
+                    raise ValueError(
+                        f"Insufficient stock. Available stock: {current_stock}"
+                    )
+
+                new_stock = current_stock - quantity
+                movement_type = "adjustment_out"
+                quantity_change = -quantity
+
+            # 3. Update product stock
+            cursor.execute(
+                """
+                UPDATE products
+                SET stock_quantity = %s
+                WHERE id = %s
+                """,
+                (new_stock, product_id)
+            )
+
+            # 4. Record stock movement
+            cursor.execute(
+                """
+                INSERT INTO stock_movements (
+                    product_id,
+                    movement_type,
+                    quantity_change,
+                    reason,
+                    created_by
+                )
+                VALUES (%s, %s, %s, %s, %s)
+                """,
+                (
+                    product_id,
+                    movement_type,
+                    quantity_change,
+                    reason.strip(),
+                    created_by
+                )
+            )
+
+        # 5. Commit both changes together
+        connection.commit()
+
+        return {
+            "success": True,
+            "message": "Stock adjusted successfully",
+            "product_id": product_id,
+            "previous_stock": current_stock,
+            "adjustment_type": adjustment_type,
+            "quantity_changed": quantity_change,
+            "current_stock": new_stock
+        }
+
+    except Exception:
+        connection.rollback()
+        raise
+
+    finally:
+        connection.close()
+
