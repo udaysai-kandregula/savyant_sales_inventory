@@ -12,6 +12,8 @@ from services.auth_decorators import (
     sales_required
 )
 
+from routes.products import products_bp
+
 
 
 def create_app():
@@ -26,6 +28,7 @@ def create_app():
     # Register authentication APIs
     app.register_blueprint(auth_bp)
     app.register_blueprint(customers_bp)
+    app.register_blueprint(products_bp)
 
 
     # Home route
