@@ -1,3 +1,4 @@
+
 from decimal import Decimal, InvalidOperation
 
 from flask import Blueprint, request, jsonify, session
@@ -7,22 +8,16 @@ from services.product_service import (
     create_product,
     get_all_products,
     get_product_by_id,
-    update_product
+    update_product,
+    set_product_status,
+    adjust_stock
 )
+
 
 from services.auth_decorators import (
     admin_required,
     login_required
 )
-
-from services.product_service import (
-    create_product,
-    get_all_products,
-    get_product_by_id,
-    update_product,
-    set_product_status
-)
-
 
 
 products_bp = Blueprint(
@@ -31,6 +26,12 @@ products_bp = Blueprint(
     url_prefix="/api/products"
 )
 
+
+# --------------------------------------------------
+# CREATE PRODUCT
+# POST /api/products
+# Admin only
+# --------------------------------------------------
 
 @products_bp.route("", methods=["POST"])
 @admin_required
@@ -50,19 +51,21 @@ def add_product():
     price = data.get("price")
     stock_quantity = data.get("stock_quantity", 0)
 
-    # Validate required text fields
+    # Validate product code
     if not isinstance(product_code, str) or not product_code.strip():
         return jsonify({
             "success": False,
             "message": "Product code is required"
         }), 400
 
+    # Validate product name
     if not isinstance(name, str) or not name.strip():
         return jsonify({
             "success": False,
             "message": "Product name is required"
         }), 400
 
+    # Validate category
     if category is not None and not isinstance(category, str):
         return jsonify({
             "success": False,
@@ -85,7 +88,10 @@ def add_product():
     except (InvalidOperation, ValueError, TypeError):
         return jsonify({
             "success": False,
-            "message": "Price must be a valid non-negative amount with up to 2 decimal places"
+            "message": (
+                "Price must be a valid non-negative amount "
+                "with up to 2 decimal places"
+            )
         }), 400
 
     # Validate stock quantity
@@ -117,24 +123,32 @@ def add_product():
             "message": "Product code already exists or database constraint failed"
         }), 409
 
-    except Exception:
+    except Exception as error:
+        print("CREATE PRODUCT ERROR:", repr(error))
+
         return jsonify({
             "success": False,
             "message": "Could not create product"
         }), 500
 
 
+# --------------------------------------------------
+# GET ALL PRODUCTS
+# GET /api/products
+# Login required
+# --------------------------------------------------
+
 @products_bp.route("", methods=["GET"])
 @login_required
 def list_products():
+
     try:
         products = get_all_products()
 
         for product in products:
+
             if product["created_at"]:
-                product["created_at"] = (
-                    product["created_at"].isoformat()
-                )
+                product["created_at"] = product["created_at"].isoformat()
 
             product["price"] = str(product["price"])
 
@@ -144,16 +158,25 @@ def list_products():
             "products": products
         }), 200
 
-    except Exception:
+    except Exception as error:
+        print("GET PRODUCTS ERROR:", repr(error))
+
         return jsonify({
             "success": False,
             "message": "Could not retrieve products"
         }), 500
 
 
+# --------------------------------------------------
+# GET PRODUCT BY ID
+# GET /api/products/<product_id>
+# Login required
+# --------------------------------------------------
+
 @products_bp.route("/<int:product_id>", methods=["GET"])
 @login_required
 def get_product(product_id):
+
     try:
         product = get_product_by_id(product_id)
 
@@ -173,12 +196,20 @@ def get_product(product_id):
             "product": product
         }), 200
 
-    except Exception:
+    except Exception as error:
+        print("GET PRODUCT ERROR:", repr(error))
+
         return jsonify({
             "success": False,
             "message": "Could not retrieve product"
         }), 500
 
+
+# --------------------------------------------------
+# UPDATE PRODUCT
+# PUT /api/products/<product_id>
+# Admin only
+# --------------------------------------------------
 
 @products_bp.route("/<int:product_id>", methods=["PUT"])
 @admin_required
@@ -223,7 +254,10 @@ def edit_product(product_id):
     except (InvalidOperation, ValueError, TypeError):
         return jsonify({
             "success": False,
-            "message": "Price must be a valid non-negative amount with up to 2 decimal places"
+            "message": (
+                "Price must be a valid non-negative amount "
+                "with up to 2 decimal places"
+            )
         }), 400
 
     try:
@@ -245,11 +279,20 @@ def edit_product(product_id):
             "message": "Product updated successfully"
         }), 200
 
-    except Exception:
+    except Exception as error:
+        print("UPDATE PRODUCT ERROR:", repr(error))
+
         return jsonify({
             "success": False,
             "message": "Could not update product"
         }), 500
+
+
+# --------------------------------------------------
+# CHANGE PRODUCT STATUS
+# PATCH /api/products/<product_id>/status
+# Admin only
+# --------------------------------------------------
 
 @products_bp.route("/<int:product_id>/status", methods=["PATCH"])
 @admin_required
@@ -285,9 +328,75 @@ def change_product_status(product_id):
             "message": f"Product {status} successfully"
         }), 200
 
-    except Exception:
+    except Exception as error:
+        print("CHANGE PRODUCT STATUS ERROR:", repr(error))
+
         return jsonify({
             "success": False,
             "message": "Could not update product status"
+        }), 500
+
+@products_bp.route(
+    "/<int:product_id>/stock-adjustment",
+    methods=["POST"]
+)
+@admin_required
+def stock_adjustment(product_id):
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+        return jsonify({
+            "success": False,
+            "message": "Request body must contain valid JSON"
+        }), 400
+
+    adjustment_type = data.get("adjustment_type")
+    quantity = data.get("quantity")
+    reason = data.get("reason")
+
+    if adjustment_type not in ("increase", "decrease"):
+        return jsonify({
+            "success": False,
+            "message": "Adjustment type must be increase or decrease"
+        }), 400
+
+    if isinstance(quantity, bool) or not isinstance(quantity, int) or quantity <= 0:
+        return jsonify({
+            "success": False,
+            "message": "Quantity must be a positive whole number"
+        }), 400
+
+    if not isinstance(reason, str) or not reason.strip():
+        return jsonify({
+            "success": False,
+            "message": "Adjustment reason is required"
+        }), 400
+
+    try:
+        result = adjust_stock(
+            product_id=product_id,
+            adjustment_type=adjustment_type,
+            quantity=quantity,
+            reason=reason,
+            created_by=session.get("user_id")
+        )
+
+        return jsonify(result), 200
+
+    except ValueError as error:
+        message = str(error)
+        status_code = 404 if message == "Product not found" else 400
+
+        return jsonify({
+            "success": False,
+            "message": message
+        }), status_code
+
+    except Exception as error:
+        print("ADJUST STOCK ERROR:", repr(error))
+
+        return jsonify({
+            "success": False,
+            "message": "Failed to adjust stock"
         }), 500
 
