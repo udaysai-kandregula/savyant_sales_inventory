@@ -31,7 +31,10 @@ def serialize_report_data(rows):
         for key, value in row.items():
 
             if isinstance(value, Decimal):
-                serialized_row[key] = str(value)
+                if key == "quantity_sold":
+                    serialized_row[key] = int(value)
+                else:
+                    serialized_row[key] = str(value)
 
             elif isinstance(value, (datetime, date)):
                 serialized_row[key] = value.isoformat()
