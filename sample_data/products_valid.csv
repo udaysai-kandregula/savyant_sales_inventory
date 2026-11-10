@@ -1,5 +1,5 @@
-product_code,name,category,price,stock_quantity
-CSV001,Wireless Mouse,Accessories,750.00,20
-CSV002,Mechanical Keyboard,Accessories,2500.00,15
-CSV003,USB Hub,Accessories,1200.00,10
-CSV004,Monitor Stand,Accessories,1800.00,0
+product_code,product_name,category,price,stock_quantity,status
+CSV001,Wireless Mouse,Accessories,750.00,20,active
+CSV002,Mechanical Keyboard,Accessories,2500.00,15,active
+CSV003,USB Hub,Accessories,1200.00,10,active
+CSV004,Monitor Stand,Accessories,1800.00,0,inactive

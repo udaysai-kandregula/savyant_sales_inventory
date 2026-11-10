@@ -8,10 +8,11 @@ from database.db import get_db_connection
 
 REQUIRED_COLUMNS = [
     "product_code",
-    "name",
+    "product_name",
     "category",
     "price",
-    "stock_quantity"
+    "stock_quantity",
+    "status"
 ]
 
 
@@ -63,10 +64,11 @@ def validate_csv_content(file_content):
             continue
 
         product_code = (row.get("product_code") or "").strip()
-        name = (row.get("name") or "").strip()
+        name = (row.get("product_name") or "").strip()
         category = (row.get("category") or "").strip()
         price_value = (row.get("price") or "").strip()
         stock_value = (row.get("stock_quantity") or "").strip()
+        status = (row.get("status") or "").strip().lower()
 
         if not product_code:
             errors.append(
@@ -123,12 +125,17 @@ def validate_csv_content(file_content):
             )
             continue
 
+        if status not in ("active", "inactive"):
+            errors.append(f"Row {row_number}: Status must be active or inactive.")
+            continue
+
         products.append({
             "product_code": product_code,
             "name": name,
             "category": category or None,
             "price": format(price, ".2f"),
-            "stock_quantity": stock_quantity
+            "stock_quantity": stock_quantity,
+            "status": status
         })
 
     if errors:
@@ -203,14 +210,15 @@ def import_products_from_csv(file_content, created_by):
                         stock_quantity,
                         status
                     )
-                    VALUES (%s, %s, %s, %s, %s, 'active')
+                    VALUES (%s, %s, %s, %s, %s, %s)
                     """,
                     (
                         product["product_code"],
                         product["name"],
                         product["category"],
                         product["price"],
-                        product["stock_quantity"]
+                        product["stock_quantity"],
+                        product["status"]
                     )
                 )
 

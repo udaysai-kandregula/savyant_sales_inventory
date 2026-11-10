@@ -700,8 +700,8 @@ def test_csv_service_rejects_invalid_headers():
 
 def test_csv_service_rejects_invalid_price():
     content = make_csv_bytes(
-        "product_code,name,category,price,stock_quantity\n"
-        "P001,Mouse,Accessories,invalid,10\n"
+        "product_code,product_name,category,price,stock_quantity,status\n"
+        "P001,Mouse,Accessories,invalid,10,active\n"
     )
 
     with pytest.raises(ValueError) as error:
@@ -712,8 +712,8 @@ def test_csv_service_rejects_invalid_price():
 
 def test_csv_service_rejects_negative_stock():
     content = make_csv_bytes(
-        "product_code,name,category,price,stock_quantity\n"
-        "P001,Mouse,Accessories,500,-5\n"
+        "product_code,product_name,category,price,stock_quantity,status\n"
+        "P001,Mouse,Accessories,500,-5,active\n"
     )
 
     with pytest.raises(ValueError) as error:
@@ -724,9 +724,9 @@ def test_csv_service_rejects_negative_stock():
 
 def test_csv_service_rejects_duplicate_product_codes():
     content = make_csv_bytes(
-        "product_code,name,category,price,stock_quantity\n"
-        "P001,Mouse,Accessories,500,10\n"
-        "P001,Keyboard,Accessories,1000,5\n"
+        "product_code,product_name,category,price,stock_quantity,status\n"
+        "P001,Mouse,Accessories,500,10,active\n"
+        "P001,Keyboard,Accessories,1000,5,active\n"
     )
 
     with pytest.raises(ValueError) as error:
@@ -737,8 +737,8 @@ def test_csv_service_rejects_duplicate_product_codes():
 
 def test_csv_service_rejects_missing_product_code():
     content = make_csv_bytes(
-        "product_code,name,category,price,stock_quantity\n"
-        ",Mouse,Accessories,500,10\n"
+        "product_code,product_name,category,price,stock_quantity,status\n"
+        ",Mouse,Accessories,500,10,active\n"
     )
 
     with pytest.raises(ValueError) as error:
@@ -749,8 +749,8 @@ def test_csv_service_rejects_missing_product_code():
 
 def test_csv_service_rejects_missing_product_name():
     content = make_csv_bytes(
-        "product_code,name,category,price,stock_quantity\n"
-        "P001,,Accessories,500,10\n"
+        "product_code,product_name,category,price,stock_quantity,status\n"
+        "P001,,Accessories,500,10,active\n"
     )
 
     with pytest.raises(ValueError) as error:
@@ -761,8 +761,8 @@ def test_csv_service_rejects_missing_product_name():
 
 def test_csv_service_rejects_extra_column_values():
     content = make_csv_bytes(
-        "product_code,name,category,price,stock_quantity\n"
-        "P001,Mouse,Accessories,500,10,EXTRA\n"
+        "product_code,product_name,category,price,stock_quantity,status\n"
+        "P001,Mouse,Accessories,500,10,active,EXTRA\n"
     )
 
     with pytest.raises(ValueError) as error:
@@ -773,9 +773,9 @@ def test_csv_service_rejects_extra_column_values():
 
 def test_csv_service_rejects_all_rows_if_one_row_is_invalid():
     content = make_csv_bytes(
-        "product_code,name,category,price,stock_quantity\n"
-        "P001,Mouse,Accessories,500,10\n"
-        "P002,Keyboard,Accessories,invalid,5\n"
+        "product_code,product_name,category,price,stock_quantity,status\n"
+        "P001,Mouse,Accessories,500,10,active\n"
+        "P002,Keyboard,Accessories,invalid,5,active\n"
     )
 
     with pytest.raises(ValueError) as error:

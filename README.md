@@ -16,7 +16,7 @@ The system supports role-based access for administrators and sales users. It als
 | Flask | REST API development |
 | MySQL | Relational database |
 | PyMySQL | Python-MySQL connectivity |
-| HTML, CSS, JavaScript | Planned frontend |
+| HTML, CSS, JavaScript | Responsive browser frontend |
 | Git and GitHub | Version control |
 | Pytest | Testing framework |
 | CSV | Bulk product import |
@@ -87,6 +87,8 @@ It contains six main tables:
 | stock_movements | Maintains inventory movement history |
 
 Database schema: `database/schema.sql`
+
+Optional demonstration records: `database/sample_data.sql` (run after the schema).
 
 Required SQL queries: `database/queries.sql`
 
@@ -237,7 +239,29 @@ The application runs locally at:
 http://127.0.0.1:5000
 ```
 
-## 10. Application Routes
+## 10. First administrator account
+
+Public registration intentionally creates Sales accounts only. After database and environment setup, create the first administrator from the project root:
+
+```bash
+python create_admin.py
+```
+
+Enter the administrator name, email and password when prompted. The password is hashed before storage. Do not share the account credentials.
+
+## 11. Use the web interface
+
+Start Flask and open `http://127.0.0.1:5000`. Sign in with the administrator account or register a Sales account. The frontend provides customer/product views, draft order creation, order confirmation/cancellation, reports, stock history and administrator-only product CSV import.
+
+CSV import headers must be exactly:
+
+```text
+product_code,product_name,category,price,stock_quantity,status
+```
+
+Use `sample_data/products_valid.csv` and `sample_data/products_invalid.csv` as examples. Imports validate the entire file before writing and are rolled back on database errors.
+
+## 12. Application Routes
 
 ### General Routes
 
@@ -394,3 +418,19 @@ Feature branches include:
 **Project:** Savyant Sales and Inventory Management System
 
 **Repository:** [GitHub - savyant_sales_inventory](https://github.com/udaysai-kandregula/savyant_sales_inventory)
+
+
+## Debugging exercise
+
+See `docs/DEBUGGING_EXERCISE.md` for the faulty total-calculation example, corrected Decimal implementation, explanation and expected test cases.
+
+## Automated tests
+
+Run `python -m pytest -q`. The automated suite uses mocked database operations for application-level behavior; also test the application against a local MySQL database before deployment.
+
+## Known limitations / review points
+
+- The app is intended for local demonstration and is not production-hardened for public internet deployment. Use HTTPS, a strong secret, a shared rate-limit store, backups and production server configuration before deployment.
+- Report endpoints currently return all-time summaries; date-range filtering is not exposed in the UI/API yet.
+- Product/customer listing endpoints return the current catalogue; server-side pagination and richer filters can be added for large datasets.
+- A 5–8 minute demo recording is a separate submission task and must be recorded by the candidate.

@@ -422,17 +422,17 @@ Form field:
 Required CSV headers, in this exact order:
 
 ```csv
-product_code,name,category,price,stock_quantity
+product_code,product_name,category,price,stock_quantity,status
 ```
 
 Example CSV:
 
 ```csv
-product_code,name,category,price,stock_quantity
-CSV001,Wireless Mouse,Accessories,750.00,20
-CSV002,Mechanical Keyboard,Accessories,2500.00,15
-CSV003,USB Hub,Accessories,1200.00,10
-CSV004,Monitor Stand,Accessories,1800.00,0
+product_code,product_name,category,price,stock_quantity,status
+CSV001,Wireless Mouse,Accessories,750.00,20,active
+CSV002,Mechanical Keyboard,Accessories,2500.00,15,active
+CSV003,USB Hub,Accessories,1200.00,10,active
+CSV004,Monitor Stand,Accessories,1800.00,0,inactive
 ```
 
 Validation rules:
@@ -440,7 +440,8 @@ Validation rules:
 - File must not be empty.
 - File must use UTF-8 encoding.
 - Required headers must match.
-- Product code and name are required.
+- Product code and product name are required.
+- Status must be `active` or `inactive`.
 - Duplicate product codes in the file are rejected.
 - Existing product codes are rejected.
 - Price must be non-negative with up to two decimal places.

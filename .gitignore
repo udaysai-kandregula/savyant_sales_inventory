@@ -1,9 +1,10 @@
 venv/
 .venv/
 __pycache__/
-*.pyc
+*.py[cod]
 .env
 .pytest_cache/
 .idea/
 .vscode/
+.DS_Store
 cookies.txt

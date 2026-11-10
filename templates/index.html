@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Savyant Sales and Inventory Management System</title>
+
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+    <header>
+        <div class="brand">
+            SAVYANT
+            <span>SALES & INVENTORY</span>
+        </div>
+
+        <h1 class="visually-hidden">
+            Savyant Sales and Inventory Management System
+        </h1>
+
+        <div id="userbar" hidden>
+            <span id="who"></span>
+            <button class="secondary" id="logout">Logout</button>
+        </div>
+    </header>
+
+    <main>
+
+        <!-- Authentication Section -->
+        <section id="auth" class="auth card">
+
+            <div>
+                <p class="eyebrow">BUSINESS CONTROL CENTRE</p>
+
+                <h1>
+                    Manage sales.<br>
+                    <em>Move forward.</em>
+                </h1>
+
+                <p class="muted">
+                    A simple workspace for customers, products, orders and stock.
+                </p>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm">
+
+                <h2>Welcome back</h2>
+
+                <label>
+                    Email
+                    <input type="email" name="email" required>
+                </label>
+
+                <label>
+                    Password
+                    <input type="password" name="password" required>
+                </label>
+
+                <button>Sign in</button>
+
+                <p class="muted small">
+                    New sales user?
+                    <a href="#" id="showRegister">Create an account</a>
+                </p>
+
+            </form>
+
+            <!-- Registration Form -->
+            <form id="registerForm" hidden>
+
+                <h2>Create sales account</h2>
+
+                <label>
+                    Full name
+                    <input name="name" required>
+                </label>
+
+                <label>
+                    Email
+                    <input type="email" name="email" required>
+                </label>
+
+                <label>
+                    Password (8+ characters)
+                    <input
+                        type="password"
+                        name="password"
+                        minlength="8"
+                        required
+                    >
+                </label>
+
+                <button>Create account</button>
+
+                <p class="small">
+                    <a href="#" id="showLogin">Back to login</a>
+                </p>
+
+            </form>
+
+        </section>
+
+        <!-- Main Application Section -->
+        <section id="app" hidden>
+
+            <!-- Welcome Section -->
+            <div class="welcome">
+
+                <div>
+                    <p class="eyebrow">OVERVIEW</p>
+
+                    <h1>
+                        Your business, <em>in control.</em>
+                    </h1>
+                </div>
+
+                <span class="pill" id="role"></span>
+
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav id="tabs">
+
+                <button class="tab active" data-tab="dashboard">
+                    Dashboard
+                </button>
+
+                <button class="tab" data-tab="customers">
+                    Customers
+                </button>
+
+                <button class="tab" data-tab="products">
+                    Products
+                </button>
+
+                <button class="tab" data-tab="orders">
+                    Orders
+                </button>
+
+                <button class="tab" data-tab="reports">
+                    Reports
+                </button>
+
+                <button class="tab" data-tab="stock">
+                    Stock history
+                </button>
+
+            </nav>
+
+            <!-- Notification Area -->
+            <div id="notice" role="status"></div>
+
+            <!-- Dashboard Section -->
+            <section class="panel" id="dashboard">
+
+                <div class="stats" id="stats"></div>
+
+                <div class="card">
+
+                    <h2>Quick start</h2>
+
+                    <p class="muted">
+                        Use the tabs to manage records. Sales users can create
+                        and manage their own orders. Admins can manage master
+                        data and import products.
+                    </p>
+
+                </div>
+
+            </section>
+
+            <!-- Customers Section -->
+            <section class="panel" id="customers" hidden>
+
+                <div class="section-head">
+
+                    <div>
+                        <p class="eyebrow">RELATIONSHIPS</p>
+                        <h2>Customers</h2>
+                    </div>
+
+                </div>
+
+                <!-- Add Customer Form -->
+                <form id="customerForm" class="inline-form admin-only">
+
+                    <input
+                        name="name"
+                        placeholder="Customer name"
+                        required
+                    >
+
+                    <input
+                        name="email"
+                        type="email"
+                        placeholder="Email"
+                    >
+
+                    <input
+                        name="mobile"
+                        placeholder="Mobile"
+                    >
+
+                    <input
+                        name="city"
+                        placeholder="City"
+                    >
+
+                    <button>Add customer</button>
+
+                </form>
+
+                <div id="customerList" class="table-wrap"></div>
+
+            </section>
+
+            <!-- Products Section -->
+            <section class="panel" id="products" hidden>
+
+                <div class="section-head">
+
+                    <div>
+                        <p class="eyebrow">CATALOGUE</p>
+                        <h2>Products</h2>
+                    </div>
+
+                </div>
+
+                <!-- Add Product Form -->
+                <form id="productForm" class="inline-form admin-only">
+
+                    <input
+                        name="product_code"
+                        placeholder="Product code"
+                        required
+                    >
+
+                    <input
+                        name="name"
+                        placeholder="Product name"
+                        required
+                    >
+
+                    <input
+                        name="category"
+                        placeholder="Category"
+                    >
+
+                    <input
+                        name="price"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="Price"
+                        required
+                    >
+
+                    <input
+                        name="stock_quantity"
+                        type="number"
+                        min="0"
+                        step="1"
+                        placeholder="Opening stock"
+                        required
+                    >
+
+                    <button>Add product</button>
+
+                </form>
+
+                <!-- Product Search -->
+                <div class="toolbar">
+
+                    <input
+                        id="productSearch"
+                        placeholder="Search products..."
+                    >
+
+                </div>
+
+                <div id="productList" class="table-wrap"></div>
+
+                <!-- CSV Import Form -->
+                <form id="csvForm" class="card admin-only">
+
+                    <h3>Bulk import products</h3>
+
+                    <p class="muted small">
+                        CSV columns: product_code, product_name, category,
+                        price, stock_quantity, status
+                    </p>
+
+                    <input
+                        type="file"
+                        name="file"
+                        accept=".csv"
+                        required
+                    >
+
+                    <button>Import CSV</button>
+
+                    <a href="/sample_data/products_valid.csv">
+                        Download sample CSV
+                    </a>
+
+                </form>
+
+            </section>
+
+            <!-- Orders Section -->
+            <section class="panel" id="orders" hidden>
+
+                <div class="section-head">
+
+                    <div>
+                        <p class="eyebrow">SALES</p>
+                        <h2>Create an order</h2>
+                    </div>
+
+                </div>
+
+                <!-- Create Order Form -->
+                <form id="orderForm" class="card">
+
+                    <div class="inline-form">
+
+                        <select
+                            name="customer_id"
+                            id="orderCustomer"
+                            required
+                        >
+                            <option value="">Choose customer</option>
+                        </select>
+
+                        <input
+                            name="discount_percentage"
+                            type="number"
+                            min="0"
+                            max="20"
+                            step="0.01"
+                            value="0"
+                            placeholder="Discount %"
+                        >
+
+                    </div>
+
+                    <div id="orderLines"></div>
+
+                    <button
+                        type="button"
+                        class="secondary"
+                        id="addLine"
+                    >
+                        + Add product
+                    </button>
+
+                    <div class="totals" id="orderTotals">
+                        Totals are calculated by the server when saved.
+                    </div>
+
+                    <button>Create draft order</button>
+
+                </form>
+
+                <!-- Order Lookup -->
+                <h3>Order lookup</h3>
+
+                <form id="orderLookup" class="inline-form">
+
+                    <input
+                        name="id"
+                        type="number"
+                        min="1"
+                        placeholder="Order ID"
+                        required
+                    >
+
+                    <button>View order</button>
+
+                </form>
+
+                <div id="orderResult"></div>
+
+            </section>
+
+            <!-- Reports Section -->
+            <section class="panel" id="reports" hidden>
+
+                <div class="section-head">
+
+                    <div>
+                        <p class="eyebrow">INSIGHTS</p>
+                        <h2>Reports</h2>
+                    </div>
+
+                    <input
+                        id="threshold"
+                        type="number"
+                        min="0"
+                        value="5"
+                        aria-label="Low stock threshold"
+                    >
+
+                    <button id="loadReports">
+                        Refresh reports
+                    </button>
+
+                </div>
+
+                <div id="reportOutput" class="report-grid"></div>
+
+            </section>
+
+            <!-- Stock History Section -->
+            <section class="panel" id="stock" hidden>
+
+                <div class="section-head">
+
+                    <div>
+                        <p class="eyebrow">INVENTORY AUDIT</p>
+                        <h2>Stock movement history</h2>
+                    </div>
+
+                    <button id="loadStock">
+                        Refresh
+                    </button>
+
+                </div>
+
+                <div id="stockList" class="table-wrap"></div>
+
+            </section>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        © Savyant Systems · Built for clear, reliable operations
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="/static/js/app.js"></script>
+
+</body>
+</html>

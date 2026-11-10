@@ -31,3 +31,15 @@ git commit -m "fix: restrict sales users to their own orders"
 ```
 
 Do not use `git add .` if your working tree contains unrelated files.
+
+
+## Final UI and assignment alignment update
+
+- Added responsive HTML/CSS/vanilla JavaScript dashboard served at `/`.
+- Added login/register/logout, customer/product lists and creation, order draft creation and lookup, confirm/cancel actions, reports, stock movement history, administrator stock adjustments and product CSV upload.
+- Added interactive stock adjustments with mandatory reason.
+- Added first-admin creation helper (`python create_admin.py`) that prompts for credentials and stores only a password hash.
+- Aligned CSV import to assignment headers `product_code,product_name,category,price,stock_quantity,status`, including active/inactive status validation and DB insertion.
+- Added debugging exercise documentation and `.env.example`.
+- Updated sample CSVs and test fixtures to the assignment's six-column format.
+- Frontend JavaScript syntax check and Python compile check passed in the packaging environment. Full pytest could not be rerun here because Flask/PyMySQL dependencies are unavailable and package network access is blocked. The prior local run supplied by the developer was 77 passing tests before this final UI/CSV update; rerun tests in the local virtual environment now.

@@ -1,4 +1,5 @@
-product_code,name,category,price,stock_quantity
-CSV101,Wireless Headphones,Accessories,3500.00,10
-CSV102,Web Camera,Accessories,invalid_price,5
-CSV103,USB Cable,Accessories,250.00,-2
+product_code,product_name,category,price,stock_quantity,status
+CSV101,Wireless Headphones,Accessories,3500.00,10,active
+CSV102,Web Camera,Accessories,invalid_price,5,active
+CSV103,USB Cable,Accessories,250.00,-2,active
+CSV104,Desk Lamp,Lighting,500.00,4,unknown

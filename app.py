@@ -1,5 +1,5 @@
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template, send_from_directory
 from flask_wtf.csrf import CSRFProtect, generate_csrf
 from flask_wtf.csrf import CSRFError
 from extensions import limiter
@@ -71,7 +71,11 @@ def create_app():
     # Home route
     @app.route("/")
     def home():
-        return "Savyant Sales and Inventory Management System"
+        return render_template("index.html")
+
+    @app.route("/sample_data/<path:filename>")
+    def sample_data(filename):
+        return send_from_directory(BASE_DIR / "sample_data", filename, as_attachment=True)
 
     # Health check route
     @app.route("/health")
