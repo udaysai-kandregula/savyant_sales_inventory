@@ -19,8 +19,8 @@ The system supports two user roles:
 
 | Role | Permissions |
 |---|---|
-| Admin | Full administrative access |
-| Sales | Access to permitted customer, product, order, report and stock history operations |
+| Admin | Full administrative access, including viewing, confirming and cancelling all orders |
+| Sales | Can create orders and view, confirm or cancel only orders they created; can access permitted customer, product, report and stock history operations |
 
 Protected APIs require a valid login session. After login, the session cookie must be included in subsequent requests.
 
@@ -296,6 +296,11 @@ Business rules:
 
 Returns order information and its items.
 
+Order ownership rules:
+- Admin users can view any existing order.
+- Sales users can view only orders they created.
+- A sales user attempting to view another user's order receives HTTP `403 Forbidden`.
+
 ### 5.3 Confirm Order
 
 - **Method:** POST
@@ -309,6 +314,8 @@ Business rules:
 - Stock is deducted when the order is confirmed.
 - Insufficient stock prevents confirmation.
 - Confirmation is protected against duplicate execution.
+- Admin users can confirm any draft order; sales users can confirm only their own draft orders.
+- Unauthorized order confirmation returns HTTP `403 Forbidden` and does not change stock.
 - Stock changes and movement records are handled transactionally.
 
 ### 5.4 Cancel Order
@@ -324,6 +331,8 @@ Business rules:
 - Cancelling a draft order does not change stock.
 - Stock restoration is recorded in stock movement history.
 - Duplicate cancellation is prevented.
+- Admin users can cancel any order; sales users can cancel only their own orders.
+- Unauthorized order cancellation returns HTTP `403 Forbidden` and does not restore stock.
 
 ## 6. Stock Movement History API
 

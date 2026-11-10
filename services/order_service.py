@@ -19,6 +19,23 @@ def money(value):
     )
 
 
+def _check_order_ownership(order, requested_by, user_role):
+    """Allow admins all orders and sales users only their own orders."""
+
+    if (
+        isinstance(requested_by, bool)
+        or not isinstance(requested_by, int)
+        or requested_by <= 0
+    ):
+        raise ValueError("Invalid user ID")
+
+    if user_role not in ("admin", "sales"):
+        raise PermissionError("You are not authorized to access this order")
+
+    if user_role == "sales" and order["created_by"] != requested_by:
+        raise PermissionError("You are not authorized to access this order")
+
+
 def create_draft_order(customer_id, items, discount_percentage, created_by):
     """Create a draft order without deducting product stock."""
 
@@ -219,8 +236,11 @@ def create_draft_order(customer_id, items, discount_percentage, created_by):
         connection.close()
 
 
-def get_order_by_id(order_id):
-    """Retrieve an order with customer and product details."""
+def get_order_by_id(order_id, requested_by, user_role):
+    """Retrieve an order after checking the requester's ownership permissions."""
+
+    if isinstance(order_id, bool) or not isinstance(order_id, int) or order_id <= 0:
+        raise ValueError("Invalid order ID")
 
     connection = get_db_connection()
 
@@ -256,6 +276,8 @@ def get_order_by_id(order_id):
 
             if not order:
                 return None
+
+            _check_order_ownership(order, requested_by, user_role)
 
             # 2. Retrieve all products in this order
             cursor.execute(
@@ -303,7 +325,7 @@ def get_order_by_id(order_id):
         connection.close()
 
 
-def confirm_order(order_id, confirmed_by):
+def confirm_order(order_id, confirmed_by, user_role):
     """Confirm a draft order and deduct stock atomically."""
 
     if isinstance(order_id, bool) or not isinstance(order_id, int) or order_id <= 0:
@@ -320,7 +342,7 @@ def confirm_order(order_id, confirmed_by):
             # 1. Lock the order
             cursor.execute(
                 """
-                SELECT id, status
+                SELECT id, status, created_by
                 FROM sales_orders
                 WHERE id = %s
                 FOR UPDATE
@@ -332,6 +354,8 @@ def confirm_order(order_id, confirmed_by):
 
             if not order:
                 raise ValueError("Order not found")
+
+            _check_order_ownership(order, confirmed_by, user_role)
 
             if order["status"] != "draft":
                 raise ValueError(
@@ -452,7 +476,7 @@ def confirm_order(order_id, confirmed_by):
         connection.close()
 
 
-def cancel_order(order_id, cancelled_by):
+def cancel_order(order_id, cancelled_by, user_role):
     """Cancel an order and restore stock if it was confirmed."""
 
     if isinstance(order_id, bool) or not isinstance(order_id, int) or order_id <= 0:
@@ -469,7 +493,7 @@ def cancel_order(order_id, cancelled_by):
             # 1. Lock the order
             cursor.execute(
                 """
-                SELECT id, status
+                SELECT id, status, created_by
                 FROM sales_orders
                 WHERE id = %s
                 FOR UPDATE
@@ -481,6 +505,8 @@ def cancel_order(order_id, cancelled_by):
 
             if not order:
                 raise ValueError("Order not found")
+
+            _check_order_ownership(order, cancelled_by, user_role)
 
             if order["status"] == "cancelled":
                 raise ValueError("Order is already cancelled")

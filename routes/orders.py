@@ -55,18 +55,36 @@ def create_order():
 @login_required
 def get_order(order_id):
 
-    order = get_order_by_id(order_id)
+    try:
+        order = get_order_by_id(
+            order_id,
+            requested_by=session["user_id"],
+            user_role=session["role"]
+        )
 
-    if not order:
+        if not order:
+            return jsonify({
+                "success": False,
+                "message": "Order not found"
+            }), 404
+
+        return jsonify({
+            "success": True,
+            "order": order
+        }), 200
+
+    except PermissionError as error:
+        return jsonify({"success": False, "message": str(error)}), 403
+
+    except ValueError as error:
+        return jsonify({"success": False, "message": str(error)}), 400
+
+    except Exception as error:
+        print("GET ORDER ERROR:", repr(error))
         return jsonify({
             "success": False,
-            "message": "Order not found"
-        }), 404
-
-    return jsonify({
-        "success": True,
-        "order": order
-    }), 200
+            "message": "Unable to retrieve order"
+        }), 500
 
 
 # Confirm a draft order
@@ -77,10 +95,14 @@ def confirm_sales_order(order_id):
     try:
         result = confirm_order(
             order_id=order_id,
-            confirmed_by=session["user_id"]
+            confirmed_by=session["user_id"],
+            user_role=session["role"]
         )
 
         return jsonify(result), 200
+
+    except PermissionError as error:
+        return jsonify({"success": False, "message": str(error)}), 403
 
     except ValueError as error:
         message = str(error)
@@ -107,10 +129,14 @@ def cancel_sales_order(order_id):
     try:
         result = cancel_order(
             order_id=order_id,
-            cancelled_by=session["user_id"]
+            cancelled_by=session["user_id"],
+            user_role=session["role"]
         )
 
         return jsonify(result), 200
+
+    except PermissionError as error:
+        return jsonify({"success": False, "message": str(error)}), 403
 
     except ValueError as error:
         message = str(error)

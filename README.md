@@ -195,9 +195,13 @@ This creates the six required database tables.
 
 ## 8. Environment Configuration
 
-Create a `.env` file in the project root.
+Copy the example file to `.env` in the project root:
 
-Add your own MySQL configuration:
+```bash
+cp .env.example .env
+```
+
+Then edit `.env` and add your own MySQL configuration:
 
 ```env
 SECRET_KEY=your_secure_secret_key
@@ -351,7 +355,7 @@ Integration checks covered:
 
 ### Automated Testing
 
-Pytest is included in the project dependencies. Automated test cases can be added and executed using:
+The project includes automated pytest coverage for authentication, authorization, validation, reports, CSV imports, CSRF protection, rate limiting and sales-order ownership. Run the test suite using:
 
 ```bash
 python -m pytest -v
